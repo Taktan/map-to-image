@@ -4,6 +4,7 @@ const port = 3000
 
 app.use(express.json())
 const osmsm = require('osm-static-maps');
+const geometric = require('geometric')
 
 const toRectangle = (point1,point2)=>{
   return [
@@ -35,22 +36,35 @@ app.post('/toRectangle', (req,res)=>{
 })
 
 app.post('/render', (req,res)=>{
+  let coordinates = toRectangle(req.body.point1, req.body.point2);
+  console.log(coordinates)
+  console.log(geometric.polygonScale(coordinates.flat(1), 2))
   osmsm({
+    attribution:'  ',
+    zoom: 20,
     geojson: {
       "type": "FeatureCollection",
       "features": [
+        // {
+        //   "type": "Feature",
+        //   "geometry": {
+        //     "type": "Polygon",
+        //     "coordinates": toRectangle(req.body.point1, req.body.point2)
+        //   }
+        // },2
         {
           "type": "Feature",
           "geometry": {
             "type": "Polygon",
-            "coordinates": toRectangle(req.body.point1, req.body.point2)
+            "coordinates": [geometric.polygonScale(toRectangle(req.body.point1, req.body.point2).flat(1), 0.5)]
           }
-        }
+        },
+        
       ]
     },
     style:{
-      "opacity": 0,
-      "fillOpacity": 0
+      // "opacity": 0,
+      // "fillOpacity": 0
     }
   }).then(image=>{
     res.contentType('image/png')
